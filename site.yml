@@ -1,0 +1,74 @@
+---
+# Provided: the data tier of Pollie as it runs today.
+- name: Database server
+  hosts: db
+  become: true
+  tasks:
+    - name: Packages
+      ansible.builtin.apt:
+        name: [postgresql, python3-psycopg2, redis-server, acl]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: PostgreSQL is running
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: PostgreSQL user
+      community.postgresql.postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+      become_user: postgres
+
+    - name: PostgreSQL database
+      community.postgresql.postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+      become_user: postgres
+
+    - name: Redis requires a password
+      ansible.builtin.lineinfile:
+        path: /etc/redis/redis.conf
+        regexp: '^#?\s*requirepass\b'
+        line: "requirepass {{ redis_password }}"
+      notify: Restart redis
+
+    - name: Redis is running
+      ansible.builtin.service:
+        name: redis-server
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart redis
+      ansible.builtin.service:
+        name: redis-server
+        state: restarted
+
+- name: App server
+  hosts: app
+  become: true
+  tasks:
+    - name: Group pollie
+      ansible.builtin.group:
+        name: pollie
+        system: true
+
+    - name: Configuration directory
+      ansible.builtin.file:
+        path: /etc/pollie
+        state: directory
+        owner: root
+        group: pollie
+        mode: "0750"
+
+    - name: Environment file for the Pollie services
+      ansible.builtin.template:
+        src: pollie.env.j2
+        dest: /etc/pollie/pollie.env
+        owner: root
+        group: pollie
+        mode: "0640"

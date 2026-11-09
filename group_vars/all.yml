@@ -1,0 +1,6 @@
+---
+# Committed to Git last Friday by a well-meaning teammate. This is what production uses today.
+db_name: pollie
+db_user: pollie
+db_password: "Winter2023!"
+redis_password: "redis-prod-pass"
