@@ -22,13 +22,21 @@
 
 ## 🎬 The situation
 
-<p align="center"><img src="assets/gifs/situation.gif" width="300" alt="Animation: ansible-vault encrypt"></p>
+<p align="center"><img src="assets/gifs/situation.gif" width="300" alt="A plain password replaced by an encrypted vault entry"></p>
 
-Monday, 09:10. A message from the security team: *"Your infrastructure repository contains the production database password. It has been there since Friday. It is in the history of every clone. Fix it today."*
+```text
+From    : Security
+To      : Platform
+Sent    : Monday, 09:10
+Subject : Your infrastructure repository contains the production database password
 
-They are right. A well-meaning teammate committed `group_vars/all.yml` with the PostgreSQL and Redis passwords of Pollie's data tier. The playbook works, production works, and the secrets are readable by everybody who ever had access to the repository.
+It has been there since Friday. It is in the history of every clone.
+Fix it today.
+```
 
-You will not just delete the file. You will **rotate** the secrets, move them into **Ansible Vault**, make the playbook run without anybody typing a password, and prove that nothing leaks, not into the repository and not into the playbook output.
+They are right. A well-meaning teammate committed `group_vars/all.yml` with the PostgreSQL and Redis passwords of Pollie's data tier. The playbook works and production works, and every person who ever had access to the repository can read the secrets.
+
+Deleting the file is not a fix, because the history keeps it. You will **rotate** the secrets, move them into **Ansible Vault**, make the playbook run without anybody typing a password, and prove that nothing leaks, not into the repository and not into the playbook output.
 
 > [!IMPORTANT]
 > **Your mission**
